@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>Document Picture-in-Picture IFrame Example</title>
+<link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+<style>
+body {
+ margin: 50px 200px 50px 50px;
+}
+</style>
+</head>
+<body class="mdc-typography">
+  <h2 class="mdc-typography--headline3">IFrame Example</h2>
+  <p>
+  This example opens a picture-in-picture window with a 5-minute countdown timer
+  in an IFrame element.
+  </p>
+  <button id="btnStart" class="mdc-button mdc-button--raised">
+    <span class="mdc-button__label">Start Countdown</span>
+  </button>
+  <div id="divError" style="display: none;"></div>
+  <script>
+const isPipEnabled = !!window.requestPictureInPictureWindow;
+const btnStart = document.getElementById('btnStart');
+const divError = document.getElementById('divError');
+
+btnStart.addEventListener('click', _ => {
+  if (!isPipEnabled) {
+    divError.innerText = 'Error: Document Picture-in-Picture API is not enabled.';
+    divError.style.display = 'block';
+  }
+  window.requestPictureInPictureWindow().then(onPipOpening);
+});
+
+function onPipOpening(pipWin) {
+  const pipStyles = pipWin.document.createElement('link');
+  pipStyles.setAttribute('rel', 'stylesheet');
+  pipStyles.setAttribute('href', 'iframe_pip.css');
+  pipWin.document.head.append(pipStyles);
+
+  const iframe = pipWin.document.createElement('iframe');
+  iframe.setAttribute('src', 'iframe_pip.html');
+  iframe.setAttribute('frameborder', '0');
+  pipWin.document.body.append(iframe);
+}
+  </script>
+</body>

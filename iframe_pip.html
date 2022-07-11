@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+<style>
+h2 {
+  text-align: center;
+}
+</style>
+</head>
+<body class="mdc-typography">
+  <h2 class="mdc-typography--headline3">
+    <span id="spanMinutes"></span>:<span id="spanSeconds"></span>
+  </div>
+  <script>
+const spanMinutes = document.getElementById('spanMinutes');
+const spanSeconds = document.getElementById('spanSeconds');
+const fiveMinutesFromNow = getFiveMinutesFromNow();
+const updateInterval = setInterval(updateCurrentTime, 20);
+
+function getFiveMinutesFromNow() {
+  const now = new Date().getTime();
+  return new Date(now + (5 * 60 * 1000)).getTime();
+}
+
+function updateCurrentTime() {
+  const now = new Date().getTime();
+  const difference = fiveMinutesFromNow - now;
+  if (difference < 0) {
+    clearInterval(updateInterval);
+    spanMinutes.innerText = '0';
+    spanSeconds.innerText = '00';
+  }
+
+  const minutesLeft = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+  const secondsLeft = Math.floor((difference % (1000 * 60)) / 1000);
+
+  spanMinutes.innerText = minutesLeft.toString();
+  spanSeconds.innerText = (secondsLeft < 10) ? ('0' + secondsLeft.toString()) : secondsLeft.toString();
+}
+
+  </script>
+</body>

@@ -1,0 +1,11 @@
+#divContent {
+  width: 100%;
+  height: 100%;
+  background-color: rgb(225, 225, 255);
+}
+
+#divContent video {
+  position: relative;
+  width: 98%;
+  left: 1%;
+}

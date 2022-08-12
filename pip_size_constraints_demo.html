@@ -1,0 +1,101 @@
+<head>
+    <title>PiP Size Constraints Demo</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #container {
+            width: 100%;
+            height: 100%;
+            background: Cornsilk;
+            position: relative;
+        }
+
+        #window {
+            background: DarkGray;
+            position: absolute;
+        }
+
+        :root {
+            --resize-handle-length: 50px;
+            --resize-handle-edge: 20px;
+        }
+
+        .resize-handle {
+            background: DarkGreen;
+            position: absolute;
+        }
+
+        .resize-handle-wide {
+            margin-left: calc(var(--resize-handle-length) / -2);
+            left: 50%;
+            width: var(--resize-handle-length);
+            height: var(--resize-handle-edge);
+        }
+
+        .resize-handle-tall {
+            margin-top: calc(var(--resize-handle-length) / -2);
+            top: 50%;
+            height: var(--resize-handle-length);
+            width: var(--resize-handle-edge);
+        }
+
+        .resize-handle-corner {
+            width: var(--resize-handle-edge);
+            height: var(--resize-handle-edge);
+        }
+
+        #top {
+            top: 0;
+        }
+
+        #bottom {
+            bottom: 0;
+        }
+
+        #left {
+            left: 0;
+        }
+
+        #right {
+            right: 0;
+        }
+
+        #top-left {
+            top: 0;
+            left: 0;
+        }
+
+        #top-right {
+            top: 0;
+            right: 0;
+        }
+
+        #bottom-left {
+            bottom: 0;
+            left: 0;
+        }
+
+        #bottom-right {
+            bottom: 0;
+            right: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="window">
+            <div id="top-left" class="resize-handle resize-handle-corner"></div>
+            <div id="top" class="resize-handle resize-handle-wide"></div>
+            <div id="top-right" class="resize-handle resize-handle-corner"></div>
+            <div id="left" class="resize-handle resize-handle-tall"></div>
+            <div id="right" class="resize-handle resize-handle-tall"></div>
+            <div id="bottom-left" class="resize-handle resize-handle-corner"></div>
+            <div id="bottom" class="resize-handle resize-handle-wide"></div>
+            <div id="bottom-right" class="resize-handle resize-handle-corner"></div>
+        </div>
+    </div>
+    <script src="pip_size_constraints_demo.js"></script>
+</body>

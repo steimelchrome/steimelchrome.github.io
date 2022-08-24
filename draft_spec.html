@@ -8,7 +8,7 @@
   <link href="https://www.w3.org/2008/site/images/favicon.ico" rel="icon">
   <meta content="Bikeshed version e8a706a4b, updated Fri Jul 15 11:08:03 2022 -0700" name="generator">
   <link href="http://example.com/url-this-spec-will-live-at" rel="canonical">
-  <meta content="d23c3d5af70d85102cbcfe6e3c5c44b4e634c7e5" name="document-revision">
+  <meta content="6c109faea58c9996b51729575e4792054587c95c" name="document-revision">
 <style>/* style-autolinks */
 
 .css.css, .property.property, .descriptor.descriptor {
@@ -929,6 +929,7 @@ if they were being parsed on the <code class="idl"><a data-link-type="idl" href=
   <c- a>const</c-> pipOptions <c- o>=</c-> <c- p>{</c->
     initialAspectRatio<c- o>:</c-> player<c- p>.</c->clientWidth <c- o>/</c-> player<c- p>.</c->clientHeight<c- p>,</c->
     lockAspectRatio<c- o>:</c-> <c- kc>true</c-><c- p>,</c->
+    copyStyleSheets<c- o>:</c-> <c- kc>true</c->
   <c- p>};</c->
 
   navigator<c- p>.</c->pictureInPicture<c- p>.</c->requestWindow<c- p>(</c->pipOptions<c- p>).</c->then<c- p>((</c->_pipSession<c- p>)</c-> <c- p>=></c-> <c- p>{</c->
@@ -936,13 +937,6 @@ if they were being parsed on the <code class="idl"><a data-link-type="idl" href=
 
     <c- c1>// Style remaining container to imply the player is in PiP.</c->
     playerContainer<c- p>.</c->classList<c- p>.</c->add<c- p>(</c-><c- t>'pip-mode'</c-><c- p>);</c->
-
-    <c- c1>// Add styles to the PiP window.</c->
-    <c- a>const</c-> styleLink <c- o>=</c-> document<c- p>.</c->createElement<c- p>(</c-><c- t>'link'</c-><c- p>);</c->
-    styleLink<c- p>.</c->href <c- o>=</c-> <c- t>'pip.css'</c-><c- p>;</c->
-    styleLink<c- p>.</c->rel <c- o>=</c-> <c- t>'stylesheet'</c-><c- p>;</c->
-    <c- a>const</c-> pipBody <c- o>=</c-> pipSession<c- p>.</c->document<c- p>.</c->body<c- p>;</c->
-    pipBody<c- p>.</c->append<c- p>(</c->styleLink<c- p>);</c->
 
     <c- c1>// Add player to the PiP window.</c->
     pipBody<c- p>.</c->append<c- p>(</c->player<c- p>);</c->

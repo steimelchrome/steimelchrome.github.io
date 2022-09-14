@@ -27,16 +27,16 @@ body {
   <h3 class="mdc-typography--headline4">Using the feature</h3>
   <p>
   To open a document picture-in-picture window, use the
-  <code>window.requestPictureInPictureWindow()</code> method with the feature
+  <code>navigator.documentPictureInPicture.requestWindow()</code> method with the feature
   enabled. You can optionally supply a couple of parameters to
-  <code>window.requestPictureInPictureWindow()</code>:
+  <code>requestWindow()</code>:
   <pre>
   <code>
-    window.requestPictureInPictureWindow({
+    navigator.documentPictureInPicture.requestWindow({
       initialAspectRatio: (width / height), /* The initial aspect ratio of the window. */
       lockAspectRatio: true, /* True if the window should be forced to remain at the initial aspect ratio when resized. */
-    }).then((pipWindow) => {
-      pipWindow.document.append(someElement);
+    }).then((pipSession) => {
+      pipSession.window.document.append(someElement);
     });
   </code>
   </pre>
@@ -54,13 +54,13 @@ body {
   <ul>
     <li>"Back to tab" button</li>
     <li>
-      <code>setAspectRatio()</code> method on the DocumentPictureInPictureWindow
+      <code>setAspectRatio()</code> method on the DocumentPictureInPictureSession
       object
     </li>
     <li>
       <code>enterpictureinpicture/leavepictureinpicture</code> events
       (though you can infer <code>enterpictureinpicture</code> when the Promise
-      returned by <code>window.requestPictureInPictureWindow()</code> resolves
+      returned by <code>requestWindow()</code> resolves
       and infer <code>leavepictureinpicture</code> when the window's unload
       event fires)
     </li>

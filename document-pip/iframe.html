@@ -30,19 +30,20 @@ btnStart.addEventListener('click', _ => {
     divError.innerText = 'Error: Document Picture-in-Picture API is not enabled.';
     divError.style.display = 'block';
   }
-  window.requestPictureInPictureWindow().then(onPipOpening);
+  navigator.documentPictureInPicture.requestWindow().then(onPipOpening);
 });
 
-function onPipOpening(pipWin) {
-  const pipStyles = pipWin.document.createElement('link');
+function onPipOpening(pipSession) {
+  const pipStyles = pipSession.document.createElement('link');
   pipStyles.setAttribute('rel', 'stylesheet');
   pipStyles.setAttribute('href', 'iframe_pip.css');
-  pipWin.document.head.append(pipStyles);
+  let pipDocument = pipSession.window.document;
+  pipDocument.head.append(pipStyles);
 
-  const iframe = pipWin.document.createElement('iframe');
+  const iframe = pipDocument.createElement('iframe');
   iframe.setAttribute('src', 'iframe_pip.html');
   iframe.setAttribute('frameborder', '0');
-  pipWin.document.body.append(iframe);
+  pipDocument.body.append(iframe);
 }
   </script>
 </body>

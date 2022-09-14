@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Document Picture-in-Picture Copy Styles Example</title>
+<meta charset="utf-8">
+<link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+<style>
+p {
+  color: white;
+  font-family: sans-serif;
+  font-size: 18px;
+}
+body {
+  background-color: blue;
+}
+</style>
+</head>
+<body>
+<p>This document has white text blue background specified in CSS.</p>
+<p>When the PiP window is opened, it too should have white text on a blue background.</p>
+<p>See the <code>copyStyleSheets</code> option to <code>requestWindow()</code> for more details.</p>
+<button id="btnOpenPip" class="mdc-button mdc-button--raised">
+  <span class="mdc-button__label">Open PiP</span>
+</button>
+<div id="divError" style="display: none;"></div>
+
+<script>
+const isPipEnabled = !!navigator.documentPictureInPicture;
+const btnOpenPip = document.getElementById('btnOpenPip');
+const divError = document.getElementById('divError');
+
+btnOpenPip.addEventListener('click', _ => {
+  if (!isPipEnabled) {
+    divError.innerText = 'Error: Document Picture-in-Picture API is not enabled.';
+    divError.style.display = 'block';
+    return;
+  }
+  btnOpenPip.setAttribute('disabled', true);
+  navigator.documentPictureInPicture.requestWindow({copyStyleSheets: true}).then(onPipOpening);
+});
+
+function onPipOpening(pipSession) {
+  let pipDocument = pipSession.window.document;
+  const pipText = pipDocument.createElement('p');
+  pipText.innerText="This is also some text that should be white on blue.";
+  pipDocument.body.appendChild(pipText);
+}
+
+</script>
+</body>
+</html>

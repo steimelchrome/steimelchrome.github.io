@@ -26,7 +26,7 @@ body {
 <div id="divError" style="display: none;"></div>
 
 <script>
-const isPipEnabled = !!navigator.documentPictureInPicture;
+const isPipEnabled = !!documentPictureInPicture;
 const btnOpenPip = document.getElementById('btnOpenPip');
 const divError = document.getElementById('divError');
 
@@ -36,12 +36,11 @@ btnOpenPip.addEventListener('click', _ => {
     divError.style.display = 'block';
     return;
   }
-  btnOpenPip.setAttribute('disabled', true);
-  navigator.documentPictureInPicture.requestWindow({copyStyleSheets: true}).then(onPipOpening);
+  documentPictureInPicture.requestWindow({copyStyleSheets: true}).then(onPipOpening);
 });
 
-function onPipOpening(pipSession) {
-  let pipDocument = pipSession.window.document;
+function onPipOpening(pipWindow) {
+  let pipDocument = pipWindow.document;
   const pipText = pipDocument.createElement('p');
   pipText.innerText="This is also some text that should be white on blue.";
   pipDocument.body.appendChild(pipText);

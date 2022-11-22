@@ -27,16 +27,16 @@ body {
   <h3 class="mdc-typography--headline4">Using the feature</h3>
   <p>
   To open a document picture-in-picture window, use the
-  <code>navigator.documentPictureInPicture.requestWindow()</code> method with the feature
+  <code>documentPictureInPicture.requestWindow()</code> method with the feature
   enabled. You can optionally supply a couple of parameters to
   <code>requestWindow()</code>:
   <pre>
   <code>
-    navigator.documentPictureInPicture.requestWindow({
+    documentPictureInPicture.requestWindow({
       initialAspectRatio: (width / height), /* The initial aspect ratio of the window. */
       lockAspectRatio: true, /* True if the window should be forced to remain at the initial aspect ratio when resized. */
-    }).then((pipSession) => {
-      pipSession.window.document.append(someElement);
+    }).then((pipWindow) => {
+      pipWindow.document.append(someElement);
     });
   </code>
   </pre>

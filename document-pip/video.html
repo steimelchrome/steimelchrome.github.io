@@ -25,14 +25,14 @@
   </button>
   <div id="divError" style="display: none;"></div>
   <script>
-const isPipEnabled = !!navigator.documentPictureInPicture;
+const isPipEnabled = !!documentPictureInPicture;
 const btnOpenPip = document.getElementById('btnOpenPip');
 const btnClosePip = document.getElementById('btnClosePip');
 const divContent = document.getElementById('divContent');
 const divContainer = document.getElementById('divContainer');
 const divPlaceholder = document.getElementById('divPlaceholder');
 const divError = document.getElementById('divError');
-let pipSession;
+let pipWindow;
 
 btnOpenPip.addEventListener('click', _ => {
   if (!isPipEnabled) {
@@ -40,27 +40,27 @@ btnOpenPip.addEventListener('click', _ => {
     divError.style.display = 'block';
   }
   btnOpenPip.setAttribute('disabled', true);
-  navigator.documentPictureInPicture.requestWindow({
+  documentPictureInPicture.requestWindow({
     initialAspectRatio: 1.3,
     lockAspectRatio: true,
   }).then(onPipOpening);
 });
 
 btnClosePip.addEventListener('click', _ => {
-  if (!pipSession) return;
-  pipSession.window.close();
+  if (!pipWindow) return;
+  pipWindow.close();
 });
 
-function onPipOpening(newPipSession) {
+function onPipOpening(newPipWindow) {
   // We may see the new PiP window open before the previous one closes. In that
   // case, remove the content fromt the existing PiP window.
-  if (pipSession) {
-    onPipClosing(pipSession);
+  if (pipWindow) {
+    onPipClosing(pipWindow);
   }
-  pipSession = newPipSession;
-  pipSession.window.addEventListener('unload', onPipClosing.bind(null, pipSession));
+  pipWindow = newPipWindow;
+  pipWindow.addEventListener('unload', onPipClosing.bind(null, pipWindow));
   btnClosePip.removeAttribute('disabled');
-  let pipDocument = pipSession.window.document;
+  let pipDocument = pipWindow.document;
   pipDocument.body.append(divContent);
   divPlaceholder.style.display = 'block';
   const pipStyles = pipDocument.createElement('link');
@@ -69,11 +69,11 @@ function onPipOpening(newPipSession) {
   pipDocument.head.append(pipStyles);
 }
 
-function onPipClosing(newPipSession) {
-  if (newPipSession != pipSession) return;
+function onPipClosing(newPipWindow) {
+  if (newPipWindow != pipWindow) return;
   divPlaceholder.style.display = 'none';
   divContainer.append(divContent);
-  pipSession = null;
+  pipWindow = null;
   btnOpenPip.removeAttribute('disabled');
   btnClosePip.setAttribute('disabled', '');
 }

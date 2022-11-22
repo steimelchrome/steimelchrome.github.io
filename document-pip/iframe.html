@@ -21,7 +21,7 @@ body {
   </button>
   <div id="divError" style="display: none;"></div>
   <script>
-const isPipEnabled = !!window.requestPictureInPictureWindow;
+const isPipEnabled = !!documentPictureInPicture;
 const btnStart = document.getElementById('btnStart');
 const divError = document.getElementById('divError');
 
@@ -30,14 +30,14 @@ btnStart.addEventListener('click', _ => {
     divError.innerText = 'Error: Document Picture-in-Picture API is not enabled.';
     divError.style.display = 'block';
   }
-  navigator.documentPictureInPicture.requestWindow().then(onPipOpening);
+  documentPictureInPicture.requestWindow().then(onPipOpening);
 });
 
-function onPipOpening(pipSession) {
-  const pipStyles = pipSession.document.createElement('link');
+function onPipOpening(pipWindow) {
+  const pipStyles = pipWindow.document.createElement('link');
   pipStyles.setAttribute('rel', 'stylesheet');
   pipStyles.setAttribute('href', 'iframe_pip.css');
-  let pipDocument = pipSession.window.document;
+  let pipDocument = pipWindow.document;
   pipDocument.head.append(pipStyles);
 
   const iframe = pipDocument.createElement('iframe');

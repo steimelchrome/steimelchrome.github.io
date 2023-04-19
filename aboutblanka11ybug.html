@@ -1,0 +1,28 @@
+<body>
+<button id="btnOpen">Open about:blank document with bug</button>
+<script>
+const btnOpen = document.getElementById('btnOpen');
+
+function openWindow() {
+  const win = window.open('about:blank');
+  addButtons(win.document);
+}
+
+function addButtons(doc) {
+  const div = doc.createElement('div');
+  div.style.position = 'absolute';
+  div.style.bottom = '0';
+  div.append(createButton(doc));
+  div.append(createButton(doc));
+  doc.body.append(div);
+}
+
+function createButton(doc) {
+  const btn = doc.createElement('button');
+  btn.innerText = 'Button';
+  return btn;
+}
+
+btnOpen.addEventListener('click', openWindow);
+</script>
+</body>

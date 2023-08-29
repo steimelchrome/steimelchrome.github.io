@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>Autopip Demo</title>
+<style>
+#video-container {
+  border: 1px solid black;
+}
+
+#video-container, video {
+  width: 300px;
+  height: 300px;
+}
+
+#open-camera, #toggle-pip {
+  display: block;
+}
+</style>
+</head>
+<body>
+  <p id="error"></p>
+  <div id="video-container">
+    <video width=300 height=300></video>
+  </div>
+  <input type="button" id="open-camera" value="Open Camera"></input>
+  <input type="button" id="toggle-pip" value="Toggle Manual Pip"></input>
+</body>
+<script>
+const video = document.querySelector('video');
+const videoContainer = document.querySelector('#video-container');
+const errorDisplay = document.querySelector('#error');
+const openCameraButton = document.querySelector('#open-camera');
+const togglePipButton = document.querySelector('#toggle-pip');
+let pipWindow = null;
+
+async function enterPip() {
+  if (pipWindow != null) {
+    return;
+  }
+  pipWindow = await documentPictureInPicture.requestWindow({width: 400, height: 400});
+  pipWindow.document.body.append(video);
+  pipWindow.addEventListener('unload', _ => {
+    videoContainer.append(video);
+    pipWindow = null;
+  });
+}
+
+try {
+  navigator.mediaSession.setActionHandler('enterpictureinpicture', enterPip);
+} catch(error) {
+  errorDisplay.innerText = error;
+  console.log(error);
+}
+
+openCameraButton.addEventListener("click", async () => {
+  try {
+    const constraints = { video: true, audio: true };
+    video.srcObject = await navigator.mediaDevices.getUserMedia(constraints);
+    video.muted = true;
+    video.play();
+  } catch (error) {
+    errorDisplay.innerText = error;
+    console.log(error);
+  }
+});
+
+togglePipButton.addEventListener("click", async () => {
+  if (pipWindow == null) {
+    enterPip();
+    return;
+  }
+  pipWindow.close();
+});
+
+</script>

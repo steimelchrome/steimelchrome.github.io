@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>PiP with Iframes</title>
+
+<iframe id="mainiframe"></iframe>
+
+<input id="btnOpenPip" type="button" value="Open pip with iframe"></input>
+
+<script>
+const iframesrc = 'https://googlechrome.github.io/samples/media-session/video.html';
+const btnOpenPip = document.getElementById('btnOpenPip');
+const mainiframe = document.getElementById('mainiframe');
+let pipwin;
+let pipiframe;
+
+mainiframe.setAttribute('src', iframesrc);
+
+btnOpenPip.addEventListener('click', async _ => {
+  pipwin = await documentPictureInPicture.requestWindow();
+  pipiframe = pipwin.document.createElement('iframe');
+  pipiframe.setAttribute('src', iframesrc);
+  pipwin.document.body.append(pipiframe);
+});
+</script>

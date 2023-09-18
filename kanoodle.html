@@ -450,7 +450,7 @@ function checkForSolution() {
     }
   });
   board.lock();
-  window.setTimeout(runCheckSolution.bind(null, unusedPieces), 0);
+  window.setTimeout(runCheckSolution.bind(null, unusedPieces), 10);
 }
 
 function runCheckSolution(unusedPieces) {

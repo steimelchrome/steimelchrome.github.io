@@ -1,0 +1,578 @@
+<head>
+<title>Kanoodle Solver</title>
+<style>
+:root {
+  --kanoodle-space-size: 30px;
+}
+
+.kanoodle-space {
+  aspect-ratio: 1;
+}
+
+.kanoodle-board-space {
+  background: #111;
+  border: 1px solid black;
+}
+
+.kanoodle-fill {
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+}
+
+.kanoodle-fill-board-empty {
+  background: #333;
+}
+
+.kanoodle-fill-filled {
+  background: var(--color);
+}
+
+.kanoodle-board, .kanoodle-piece {
+  display: grid;
+  grid-template-columns: repeat(var(--num-columns), 1fr);
+  position: relative;
+  width: calc(var(--kanoodle-space-size) * var(--num-columns));
+  height: calc(var(--kanoodle-space-size) * var(--num-rows));
+}
+
+.kanoodle-piece {
+  position: absolute;
+}
+
+.kanoodle-piece-selected {
+  border: 2px solid blue;
+}
+</style>
+</head>
+<body>
+<div id="header" class="header">
+  <input id="btnReset" type="button" class="btn btn-reset" value="Reset"></input>
+  <input id="btnRotate" type="button" class="btn btn-rotate" value="Rotate" disabled></input>
+  <input id="btnFlip" type="button" class="btn btn-flip" value="Flip" disabled></input>
+  <input id="btnCheckForSolution" type="button" class="btn btn-check" value="Check for Solution" disabled></input>
+  <span id="spanSolutionStatus"></span>
+  <input id="btnShowSolution" type="button" class="btn btn-show-solution" value="Show Solution" disabled></input>
+</div>
+<div id="board"></div>
+</body>
+<script>
+const kanoodleSpaceSize = 30;
+
+class KanoodleFill {
+  constructor() {
+    this.div = document.createElement('div');
+    this.div.classList.add('kanoodle-fill');
+  }
+}
+
+class KanoodleEmptyBoardFill extends KanoodleFill {
+  constructor() {
+    super();
+    this.div.classList.add('kanoodle-fill-board-empty');
+  }
+}
+
+class KanoodleFilledFill extends KanoodleFill {
+  constructor() {
+    super();
+    this.div.classList.add('kanoodle-fill-filled');
+  }
+}
+
+class KanoodleSpace {
+  constructor(fill) {
+    this.div = document.createElement('div');
+    this.div.classList.add('kanoodle-space');
+    this.fill = fill;
+    this.div.append(fill.div);
+  }
+}
+
+class KanoodleBoardSpace extends KanoodleSpace {
+  constructor() {
+    super(new KanoodleEmptyBoardFill());
+    this.div.classList.add('kanoodle-board-space');
+  }
+
+  setFill(color) {
+    this.div.innerHTML = '';
+    if (color === null) {
+      this.fill = new KanoodleEmptyBoardFill();
+    } else {
+      this.fill = new KanoodleFilledFill();
+      this.fill.div.style.setProperty('--color', color);
+    }
+    this.div.append(this.fill.div);
+  }
+}
+
+class KanoodleBoard {
+  constructor(div, rows, columns) {
+    this.div = div;
+    this.div.classList.add('kanoodle-board');
+    this.div.style.setProperty('--num-rows', rows);
+    this.div.style.setProperty('--num-columns', columns);
+    this.rows = rows;
+    this.columns = columns;
+    this.reset();
+  }
+
+  draw() {
+    this.div.innerHTML = '';
+    this.spaces.forEach(spacesRow => {
+      spacesRow.forEach(space => {
+        this.div.append(space.div);
+      });
+    });
+  }
+
+  getSpaceAt(top, left) {
+    for (let row = 0; row < this.rows; row++) {
+      for (let column = 0; column < this.columns; column++) {
+        const space = this.spaces[row][column];
+        const rect = space.div.getBoundingClientRect();
+        if (rect.top <= top && rect.bottom >= top &&
+            rect.left <= left && rect.right >= left) {
+          return [row, column];
+        }
+      }
+    }
+    return null;
+  }
+
+  canPlace(piece, position) {
+    const row = position[0];
+    const column = position[1];
+    if (piece.rows + row > this.rows ||
+        piece.columns + column > this.columns) {
+      return false;
+    }
+    for (let r = row; r < piece.rows + row; r++) {
+      for (let c = column; c < piece.columns + column; c++) {
+        if (piece.shape[r-row][c-column] && this.shape[r][c]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  place(piece, position) {
+    if (!this.locked) { resetSolution(); unselect(); btnCheckForSolution.disabled = false;}
+    const row = position[0];
+    const column = position[1];
+    for (let r = row; r < piece.rows + row; r++) {
+      for (let c = column; c < piece.columns + column; c++) {
+        if (piece.shape[r-row][c-column]) {
+          this.shape[r][c] = true;
+          if (!this.locked) {
+            this.spaces[r][c].setFill(piece.color);
+          }
+        }
+      }
+    }
+  }
+
+  unplace(piece, position) {
+    if (!this.locked) { console.error('unplace unlocked'); }
+    const row = position[0];
+    const column = position[1];
+    for (let r = row; r < piece.rows + row; r++) {
+      for (let c = column; c < piece.columns + column; c++) {
+        if (piece.shape[r-row][c-column]) {
+          this.shape[r][c] = false;
+        }
+      }
+    }
+  }
+
+  reset() {
+    this.locked = false;
+    this.shape = [];
+    this.spaces = [];
+    for (let row = 0; row < this.rows; row++) {
+      let spacesRow = [];
+      let shapeRow = [];
+      for (let column = 0; column < this.columns; column++) {
+        spacesRow.push(new KanoodleBoardSpace());
+        shapeRow.push(false);
+      }
+      this.spaces.push(spacesRow);
+      this.shape.push(shapeRow);
+    }
+    this.draw();
+  }
+
+  lock() {
+    if (this.locked) { return; }
+    // Need a deep copy of shape, since shape changes don't
+    // create a new array.
+    this.preLockShape = []; 
+    for (let row = 0; row < this.rows; row++) {
+      let shapeRow = [];
+      for (let column = 0; column < this.columns; column++) {
+        shapeRow.push(this.shape[row][column]);
+      }
+      this.preLockShape.push(shapeRow);
+    }
+    this.locked = true;
+  }
+
+  unlock() {
+    if (!this.locked) { return; }
+    this.shape = this.preLockShape;
+    this.locked = false;
+  }
+}
+
+class KanoodlePiece {
+  constructor(rows, columns, color, shape, top, left, board) {
+    this.initialRows = rows;
+    this.initialColumns = columns;
+    this.rows = rows;
+    this.columns = columns;
+    this.color = color;
+    this.initialShape = shape;
+    this.shape = shape;
+    this.used = false;
+    this.initialTop = top;
+    this.initialLeft = left;
+    this.top = top;
+    this.left = left;
+    this.board = board;
+    this.locked = false;
+
+    this.div = document.createElement('div');
+    this.div.classList.add('kanoodle-piece');
+    this.div.style.setProperty('--color', color);
+    this.isMouseDown = false;
+    this.isDragging = false;
+    this.div.addEventListener('mousedown', this.onmousedown.bind(this));
+    this.div.addEventListener('mouseup', this.onmouseup.bind(this));
+    this.div.addEventListener('mousemove', this.onmousemove.bind(this));
+    this.draw();
+  }
+
+  draw() {
+    this.div.style.setProperty('--num-rows', this.rows);
+    this.div.style.setProperty('--num-columns', this.columns);
+
+    this.div.innerHTML = '';
+    this.spaces = [];
+    this.shape.forEach(shapeRow => {
+      let spacesRow = [];
+      shapeRow.forEach(shapeSpace => {
+        const fill = shapeSpace ? new KanoodleFilledFill() : new KanoodleFill();
+        const space = new KanoodleSpace(fill);
+        spacesRow.push(space);
+        this.div.append(space.div);
+      });
+      this.spaces.push(spacesRow);
+    });
+    this.updatePosition();
+  }
+
+  updatePosition() {
+    this.div.style.setProperty('top', this.top);
+    this.div.style.setProperty('left', this.left);
+  }
+
+  onmousedown() {
+    if (this.locked) { return; }
+    this.dragStartTop = this.top;
+    this.dragStartLeft = this.left;
+    this.isMouseDown = true;
+  }
+
+  onmousemove(evt) {
+    if (this.locked) { return; }
+    if (!this.isMouseDown) { return; }
+    if (evt.buttons != 1) { return; }
+    this.top = this.top + evt.movementY;
+    this.left = this.left + evt.movementX;
+    this.updatePosition();
+    if (Math.abs(this.top - this.dragStartTop) > 5 ||
+        Math.abs(this.left - this.dragStartLeft) > 5) {
+      this.isDragging = true;
+    }
+  }
+
+  onmouseup() {
+    if (this.locked) { return; }
+    this.isMouseDown = false;
+    if (this.isDragging) {
+      this.isDragging = false;
+      this.endDrag();
+      return;
+    } else {
+      select(this);
+    }
+  }
+
+  endDrag() {
+    if (this.locked) { return; }
+    const boardDestination = this.board.getSpaceAt(this.top + (kanoodleSpaceSize / 2),
+                                                   this.left + (kanoodleSpaceSize / 2));
+    if (!boardDestination) {
+      return;
+    }
+    if (!board.canPlace(this, boardDestination)) {
+      this.top = this.dragStartTop;
+      this.left = this.dragStartLeft;
+      this.updatePosition();
+      return;
+    }
+    board.place(this, boardDestination);
+    this.used = true;
+    this.div.style.setProperty('display', 'none');
+  }
+
+  rotate(draw) {
+    const oldRows = this.rows;
+    this.rows = this.columns;
+    this.columns = oldRows;
+    const newShape = [];
+    for (let row = 0; row < this.rows; row++) {
+      const newShapeRow = [];
+      for (let column = 0; column < this.columns; column++) {
+        newShapeRow.push(this.shape[this.columns - column - 1][row]);
+      }
+      newShape.push(newShapeRow);
+    }
+    this.shape = newShape;
+    if (!this.locked) { this.draw(); }
+  }
+
+  flip(draw) {
+    const newShape = [];
+    for (let row = 0; row < this.rows; row++) {
+      const newShapeRow = [];
+      for (let column = 0; column < this.columns; column++) {
+        newShapeRow.push(this.shape[row][this.columns - column - 1]);
+      }
+      newShape.push(newShapeRow);
+    }
+    this.shape = newShape;
+    if (!this.locked) { this.draw(); }
+  }
+
+  setSelected(selected) {
+    this.div.classList.toggle('kanoodle-piece-selected', selected);
+  }
+
+  lock() {
+    if (this.locked) { return; }
+    this.preLockRows = this.rows;
+    this.preLockColumns = this.columns;
+    this.preLockShape = this.shape;
+    this.locked = true;
+  }
+
+  unlock() {
+    if (!this.locked) { return; }
+    this.rows = this.preLockRows;
+    this.columns = this.preLockColumns;
+    this.shape = this.preLockShape;
+    this.locked = false;
+  }
+
+  getShapeHash() {
+    let hash = '' + this.rows + this.columns;
+    for (let r = 0; r < this.rows; r++) {
+      for (let c = 0; c < this.columns; c++) {
+        hash = hash + this.shape[r][c];
+      }
+    }
+    return hash;
+  }
+
+  reset() {
+    this.locked = false;
+    this.used = false;
+    this.div.style.removeProperty('display');
+    this.rows = this.initialRows;
+    this.columns = this.initialColumns;
+    this.shape = this.initialShape;
+    this.top = this.initialTop;
+    this.left = this.initialLeft;
+    this.draw();
+  }
+}
+
+let selectedPiece = null;
+function select(piece) {
+  if (selectedPiece == piece) {
+    unselect();
+    return;
+  }
+
+  if (selectedPiece != null) {
+    unselect();
+  }
+
+  selectedPiece = piece;
+  piece.setSelected(true);
+  btnRotate.disabled = false;
+  btnFlip.disabled = false;
+}
+
+function unselect() {
+  if (selectedPiece == null) {
+    return;
+  }
+  selectedPiece.setSelected(false);
+  selectedPiece = null;
+  btnRotate.disabled = true;
+  btnFlip.disabled = true;
+}
+
+function resetSolution() {
+  solution = null;
+  btnShowSolution.disabled = true;
+  spanSolutionStatus.innerText = '';
+}
+
+let solution = null;
+function checkForSolution() {
+  btnCheckForSolution.disabled = true;
+  btnShowSolution.disabled = true;
+  unselect();
+  btnReset.disabled = true;
+  spanSolutionStatus.innerText = 'Checking...';
+  let unusedPieces = [];
+  solution = [];
+  pieces.forEach(piece => {
+    piece.lock();
+    if (!piece.used) {
+      unusedPieces.push(piece);
+      solution.push(null);
+    }
+  });
+  board.lock();
+  window.setTimeout(runCheckSolution.bind(null, unusedPieces), 0);
+}
+
+function runCheckSolution(unusedPieces) {
+  let result = canUseAllPieces(unusedPieces, 0);
+  board.unlock();
+  pieces.forEach(piece => {
+    piece.unlock();
+  });
+  btnCheckForSolution.disabled = false;
+  btnReset.disabled = false;
+  if (result) {
+    spanSolutionStatus.innerText = 'Solution found';
+    btnShowSolution.disabled = false;
+  } else {
+    spanSolutionStatus.innerText = 'No solution found';
+    solution = null;
+  }
+  return result;
+}
+
+function canUseAllPieces(unusedPieces, index) {
+  if (index == unusedPieces.length) {
+    return true;
+  }
+  const shapeSet = new Set();
+  const piece = unusedPieces[index];
+  for (let flips = 0; flips < 2; flips++) {
+    for (let rotations = 0; rotations < 4; rotations++) {
+      const shapeHash = piece.getShapeHash();
+      if (shapeSet.has(shapeHash)) { continue; }
+      shapeSet.add(shapeHash);
+      for (let row = 0; row < board.rows; row++) {
+        for (let column = 0; column < board.columns; column++) {
+          if (board.canPlace(piece, [row, column])) {
+            board.place(piece, [row, column]);
+            if (canUseAllPieces(unusedPieces, index + 1)) {
+              solution[index] = [piece, flips, rotations, row, column];
+              return true;
+            }
+            board.unplace(piece, [row, column]);
+          }
+        }
+      }
+      piece.rotate();
+    }
+    piece.flip();
+  }
+  return false;
+}
+
+function showSolution() {
+  solution.forEach(step => {
+    const piece = step[0];
+    const flips = step[1];
+    const rotations = step[2];
+    const row = step[3];
+    const column = step[4];
+    for (let i = 0; i < flips; i++) {
+      piece.flip();
+    }
+    for (let i = 0; i < rotations; i++) {
+      piece.rotate();
+    }
+    board.place(piece, [row, column]);
+    piece.used = true;
+    piece.div.style.setProperty('display', 'none');
+  });
+}
+
+const btnReset = document.getElementById('btnReset');
+const btnRotate = document.getElementById('btnRotate');
+const btnFlip = document.getElementById('btnFlip');
+const btnCheckForSolution = document.getElementById('btnCheckForSolution');
+const spanSolutionStatus = document.getElementById('spanSolutionStatus');
+const btnShowSolution = document.getElementById('btnShowSolution');
+const board = new KanoodleBoard(document.getElementById('board'), 5, 11);
+
+btnReset.addEventListener('click', _ => {
+  resetSolution();
+  unselect();
+  board.reset();
+  pieces.forEach(piece => { piece.reset(); });
+  btnCheckForSolution.disabled = true;
+});
+
+btnRotate.addEventListener('click', _ => {
+  resetSolution();
+  selectedPiece.rotate();
+});
+
+btnFlip.addEventListener('click', _ => {
+  resetSolution();
+  selectedPiece.flip();
+});
+
+btnCheckForSolution.addEventListener('click', _ => {
+  resetSolution();
+  checkForSolution();
+});
+
+btnShowSolution.addEventListener('click', _ => {
+  showSolution();
+});
+
+const pieces = [];
+pieces.push(new KanoodlePiece(3, 3, '#eee', [[0,1,0],[1,1,1],[0,1,0]], 200, 10, board));
+pieces.push(new KanoodlePiece(2, 2, '#5e5', [[1,1],[1,1]], 200, 110, board));
+pieces.push(new KanoodlePiece(2, 3, '#ee0', [[1,1,1],[1,0,1]], 200, 180, board));
+pieces.push(new KanoodlePiece(3, 3, '#7af', [[0,0,1],[0,0,1],[1,1,1]], 200, 280, board));
+pieces.push(new KanoodlePiece(4, 2, '#fbb', [[0,1],[1,1],[0,1],[0,1]], 300, 10, board));
+pieces.push(new KanoodlePiece(3, 2, '#e55', [[1,1],[1,1],[1,0]], 300, 80, board));
+pieces.push(new KanoodlePiece(3, 3, '#f77', [[1,1,0],[0,1,1],[0,0,1]], 300, 150, board));
+pieces.push(new KanoodlePiece(2, 4, '#0a6', [[0,0,1,1],[1,1,1,0]], 300, 250, board));
+pieces.push(new KanoodlePiece(3, 2, '#e73', [[1,0],[1,0],[1,1]], 430, 10, board));
+pieces.push(new KanoodlePiece(1, 4, '#b3b', [[1,1,1,1]], 430, 80, board));
+pieces.push(new KanoodlePiece(4, 2, '#55e', [[1,1],[1,0],[1,0],[1,0]], 430, 210, board));
+pieces.push(new KanoodlePiece(2, 2, '#edd', [[0,1],[1,1]], 430, 280, board));
+
+pieces.forEach(piece => {
+  document.body.append(piece.div);
+});
+
+window.addEventListener('mouseup', _ => { pieces.forEach(piece => { piece.isMouseDown = false; }); });
+
+</script>

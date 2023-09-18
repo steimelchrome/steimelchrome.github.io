@@ -248,9 +248,12 @@ class KanoodlePiece {
     this.div.style.setProperty('--color', color);
     this.isMouseDown = false;
     this.isDragging = false;
-    this.div.addEventListener('mousedown', this.onmousedown.bind(this));
-    this.div.addEventListener('mouseup', this.onmouseup.bind(this));
-    this.div.addEventListener('mousemove', this.onmousemove.bind(this));
+    this.div.addEventListener('mousedown', this.onMouseDown.bind(this));
+    this.div.addEventListener('touchstart', this.onTouchStart.bind(this));
+    this.div.addEventListener('mouseup', this.onMouseUp.bind(this));
+    this.div.addEventListener('touchend', this.onTouchEnd.bind(this));
+    this.div.addEventListener('mousemove', this.onMouseMove.bind(this));
+    this.div.addEventListener('touchmove', this.onTouchMove.bind(this));
     this.draw();
   }
 
@@ -278,19 +281,43 @@ class KanoodlePiece {
     this.div.style.setProperty('left', this.left);
   }
 
-  onmousedown() {
+  onMouseDown() {
     if (this.locked) { return; }
     this.dragStartTop = this.top;
     this.dragStartLeft = this.left;
     this.isMouseDown = true;
   }
 
-  onmousemove(evt) {
+  onTouchStart(evt) {
+    if (evt.touches.length != 1) { return; }
+    const touch = evt.touches.item(0);
+    this.initialTouchTop = touch.clientY;
+    this.initialTouchLeft = touch.clientX;
+    this.onMouseDown();
+  }
+
+  onMouseMove(evt) {
     if (this.locked) { return; }
     if (!this.isMouseDown) { return; }
     if (evt.buttons != 1) { return; }
-    this.top = this.top + evt.movementY;
-    this.left = this.left + evt.movementX;
+    this.onMove(this.left + evt.movementX, this.top + evt.movementY);
+  }
+
+  onTouchMove(evt) {
+    if (this.locked) { return; }
+    if (!this.isMouseDown) { return; }
+    if (evt.touches.length != 1) { return; }
+    evt.preventDefault();
+    const touch = evt.touches.item(0);
+    const deltaX = touch.clientX - this.initialTouchLeft;
+    const deltaY = touch.clientY - this.initialTouchTop;
+
+    this.onMove(this.dragStartLeft + deltaX, this.dragStartTop + deltaY);
+  }
+
+  onMove(newX, newY) {
+    this.top = newY;
+    this.left = newX;
     this.updatePosition();
     if (Math.abs(this.top - this.dragStartTop) > 5 ||
         Math.abs(this.left - this.dragStartLeft) > 5) {
@@ -298,7 +325,7 @@ class KanoodlePiece {
     }
   }
 
-  onmouseup() {
+  onMouseUp() {
     if (this.locked) { return; }
     this.isMouseDown = false;
     if (this.isDragging) {
@@ -307,6 +334,16 @@ class KanoodlePiece {
       return;
     } else {
       select(this);
+    }
+  }
+
+  onTouchEnd(evt) {
+    if (this.locked) { return; }
+    this.isMouseDown = false;
+    if (this.isDragging) {
+      this.isDragging = false;
+      this.endDrag();
+      return;
     }
   }
 

@@ -24,6 +24,10 @@
   </div>
   <input type="button" id="open-camera" value="Open Camera"></input>
   <input type="button" id="toggle-pip" value="Toggle Manual Pip"></input>
+  <input type="radio" id="use-document" name="pip-type" value="document" checked></input>
+  <label for="use-document">Use Document PiP"</label><br>
+  <input type="radio" id="use-video" name="pip-type" value="video"></input>
+  <label for="use-Video">Use PiP 1.x"</label><br>
 </body>
 <script>
 const video = document.querySelector('video');
@@ -34,15 +38,20 @@ const togglePipButton = document.querySelector('#toggle-pip');
 let pipWindow = null;
 
 async function enterPip() {
+  const pipType = document.querySelector('input[name="pip-type"]:checked').value;
   if (pipWindow != null) {
     return;
   }
-  pipWindow = await documentPictureInPicture.requestWindow({width: 400, height: 400});
-  pipWindow.document.body.append(video);
-  pipWindow.addEventListener('unload', _ => {
-    videoContainer.append(video);
-    pipWindow = null;
-  });
+  if (pipType == "document") {
+    pipWindow = await documentPictureInPicture.requestWindow({width: 400, height: 400});
+    pipWindow.document.body.append(video);
+    pipWindow.addEventListener('unload', _ => {
+      videoContainer.append(video);
+      pipWindow = null;
+    });
+  } else {
+    video.requestPictureInPicture();
+  }
 }
 
 try {

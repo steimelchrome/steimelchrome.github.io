@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>Document Picture-in-Picture Sample - Click to Resize</title>
+<link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+</head>
+<body class="mdc-typography">
+  <h2 class="mdc-typography--headline3">Click to Resize Document Picture-in-Picture</h2>
+  <button id="btnOpenPip" class="mdc-button mdc-button--raised">
+    <span class="mdc-button__label">Open PiP</span>
+  </button>
+
+  <script>
+const btnOpenPip = document.getElementById('btnOpenPip');
+let pipWindow;
+
+btnOpenPip.addEventListener('click', async _ => {
+  pipWindow = await documentPictureInPicture.requestWindow();
+  let pipDocument = pipWindow.document;
+  const expandButton = pipDocument.document.createElement('button');
+  expandButton.textContent = 'Expand PiP Window';
+  expandButton.addEventListener('click', () => {
+    // Expand the PiP window’s width by 20px and height by 30px.
+    pipWindow.resizeBy(20, 30);
+  });
+  pipDocument.append(expandButton);
+});
+  </script>
+</body>

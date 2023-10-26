@@ -18,7 +18,7 @@ let pipWindow;
 btnOpenPip.addEventListener('click', async _ => {
   pipWindow = await documentPictureInPicture.requestWindow();
   let pipDocument = pipWindow.document;
-  const expandButton = pipDocument.document.createElement('button');
+  const expandButton = pipDocument.createElement('button');
   expandButton.textContent = 'Expand PiP Window';
   expandButton.addEventListener('click', () => {
     // Expand the PiP window’s width by 20px and height by 30px.

@@ -45,7 +45,7 @@ async function enterPip() {
   if (pipType == "document") {
     pipWindow = await documentPictureInPicture.requestWindow({width: 400, height: 400});
     pipWindow.document.body.append(video);
-    pipWindow.addEventListener('unload', _ => {
+    pipWindow.addEventListener('pagehide', _ => {
       videoContainer.append(video);
       pipWindow = null;
     });

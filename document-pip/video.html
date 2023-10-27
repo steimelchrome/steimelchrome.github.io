@@ -58,7 +58,7 @@ function onPipOpening(newPipWindow) {
     onPipClosing(pipWindow);
   }
   pipWindow = newPipWindow;
-  pipWindow.addEventListener('unload', onPipClosing.bind(null, pipWindow));
+  pipWindow.addEventListener('pagehide', onPipClosing.bind(null, pipWindow));
   btnClosePip.removeAttribute('disabled');
   let pipDocument = pipWindow.document;
   pipDocument.body.append(divContent);

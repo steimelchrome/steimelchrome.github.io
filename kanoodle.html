@@ -159,7 +159,10 @@ class KanoodleBoard {
   }
 
   place(piece, position) {
-    if (!this.locked) { resetSolution(); unselect(); btnCheckForSolution.disabled = false;}
+    if (!this.locked) {
+      onUserPlacedPiece();
+    }
+
     const row = position[0];
     const column = position[1];
     for (let r = row; r < piece.rows + row; r++) {
@@ -252,7 +255,6 @@ class KanoodlePiece {
     this.div.addEventListener('touchstart', this.onTouchStart.bind(this));
     this.div.addEventListener('mouseup', this.onMouseUp.bind(this));
     this.div.addEventListener('touchend', this.onTouchEnd.bind(this));
-    this.div.addEventListener('mousemove', this.onMouseMove.bind(this));
     this.div.addEventListener('touchmove', this.onTouchMove.bind(this));
     this.draw();
   }
@@ -296,6 +298,7 @@ class KanoodlePiece {
     this.onMouseDown();
   }
 
+  // Called from the global window 'mousemove' handler.
   onMouseMove(evt) {
     if (this.locked) { return; }
     if (!this.isMouseDown) { return; }
@@ -438,6 +441,8 @@ class KanoodlePiece {
 }
 
 let selectedPiece = null;
+let placedPieces = 0;
+
 function select(piece) {
   if (selectedPiece == piece) {
     unselect();
@@ -557,6 +562,15 @@ function showSolution() {
   });
 }
 
+function onUserPlacedPiece() {
+  resetSolution();
+  unselect();
+  placedPieces++;
+  if (placedPieces > 1) {
+    btnCheckForSolution.disabled = false;
+  }
+}
+
 const btnReset = document.getElementById('btnReset');
 const btnRotate = document.getElementById('btnRotate');
 const btnFlip = document.getElementById('btnFlip');
@@ -570,6 +584,7 @@ btnReset.addEventListener('click', _ => {
   unselect();
   board.reset();
   pieces.forEach(piece => { piece.reset(); });
+  placedPieces = 0;
   btnCheckForSolution.disabled = true;
 });
 
@@ -611,5 +626,13 @@ pieces.forEach(piece => {
 });
 
 window.addEventListener('mouseup', _ => { pieces.forEach(piece => { piece.isMouseDown = false; }); });
+
+window.addEventListener('mousemove', (evt) => {
+  pieces.forEach(piece => {
+    // Pieces that should not move will properly ignore this, so just
+    // send it to them all.
+    piece.onMouseMove(evt);
+  });
+});
 
 </script>

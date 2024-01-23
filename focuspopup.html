@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>Focus popup demo</title>
+</head>
+<body>
+  <input type="button" id="open-popup" value="Open popup window"></input>
+  <input type="button" id="focus-popup" value="Focus popup window"></input>
+</body>
+<script>
+const openPopupButton = document.querySelector('#open-popup');
+const focusPopupButton = document.querySelector('#focus-popup');
+let popupWindow = null;
+
+function openPopup() {
+  if (popupWindow != null) {
+    return;
+  }
+  popupWindow = window.open('about:blank', '_blank', 'width=300,height=300');
+}
+openPopupButton.addEventListener('click', openPopup);
+
+function focusPopup() {
+  if (popupWindow == null) {
+    return;
+  }
+  popupWindow.focus();
+}
+focusPopupButton.addEventListener('click', focusPopup);
+
+</script>

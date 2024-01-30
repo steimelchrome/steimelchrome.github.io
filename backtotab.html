@@ -23,6 +23,12 @@ async function enterPip() {
   const pipScript = pipWindow.document.createElement('script');
   pipScript.src = 'backtotabpipscript.js';
   pipWindow.document.body.append(pipScript);
+
+  const btnBackToTabFromOpenerRealm = pipWindow.document.createElement('input');
+  btnBackToTabFromOpenerRealm.setAttribute('type', 'button');
+  btnBackToTabFromOpenerRealm.value = 'Back to tab from opener realm';
+  btnBackToTabFromOpenerRealm.addEventListener('click', _ => { window.focus(); });
+  pipWindow.document.body.append(btnBackToTabFromOpenerRealm);
 }
 
 togglePipButton.addEventListener("click", async () => {

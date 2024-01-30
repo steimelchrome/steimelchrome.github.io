@@ -2,8 +2,8 @@ function backToTab() {
   opener.focus();
 }
 
-const btnBackToTab = document.createElement('input');
-btnBackToTab.setAttribute('type', 'button');
-btnBackToTab.value = 'Back to tab';
-btnBackToTab.addEventListener('click', backToTab);
-document.body.append(btnBackToTab);
+const btnBackToTabFromPipRealm = document.createElement('input');
+btnBackToTabFromPipRealm.setAttribute('type', 'button');
+btnBackToTabFromPipRealm.value = 'Back to tab from PiP realm';
+btnBackToTabFromPipRealm.addEventListener('click', backToTab);
+document.body.append(btnBackToTabFromPipRealm);

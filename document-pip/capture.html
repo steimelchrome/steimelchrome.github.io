@@ -68,7 +68,7 @@ async function enterPip() {
   if (pipWindow != null) {
     return;
   }
-  pipWindow = await documentPictureInPicture.requestWindow({width: 400, height: 400});
+  pipWindow = await documentPictureInPicture.requestWindow({width: 620, height: 620});
   pipWindow.document.body.append(video);
 
   const openerCaptureButton = pipWindow.document.createElement('input');

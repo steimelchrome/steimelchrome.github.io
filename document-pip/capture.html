@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>PiP Capture Stream Demo</title>
+<style>
+#video-container {
+  border: 1px solid black;
+}
+
+#video-container, video {
+  width: 300px;
+  height: 300px;
+}
+
+#open-capture, #toggle-pip {
+  display: block;
+}
+</style>
+</head>
+<body>
+  <div>
+    <h3>Case 1: Capture started directly in opener</h3>
+    <ol>
+      <li>Click "Capture Screen"</li>
+      <li>Select "Entire Screen" in the capture dialog</li>
+      <li>Now that the video element is streaming the capture, click on "Toggle PiP" to open a pip window</li>
+      <li>See that the pip window is successfully playing the capture stream</li>
+      <li>Close the pip window</li>
+      <li>See that the capture stream succesfully continues to play in the opener window</li>
+      <li>Refresh the page to try the next case</li>
+    </ol>
+    <h3>Case 2: Capture started in the opener from the PiP window</h3>
+    <ol>
+      <li>Click "Toggle PiP" to open a pip window</li>
+      <li>Click "Capture Screen From Opener" to open the capture dialog inside the opener page</li>
+      <li>Select "Entire Screen" in the capture dialog</li>
+      <li>See that the pip window is successfully playing the capture stream</li>
+      <li>Close the PiP window</li>
+      <li>See that the capture stream succesfully continues to play in the opener window</li>
+      <li>Refresh the page to try the next case</li>
+    </ol>
+    <h3>Case 3: Capture started in the PiP window</h3>
+    <ol>
+      <li>Click "Toggle PiP" to open a pip window</li>
+      <li>Click "Capture Screen From PiP" to open the capture dialog on the PiP window</li>
+      <li>Select "Entire Screen" in the capture dialog</li>
+      <li>See that the pip window is successfully playing the capture stream</li>
+      <li>Close the PiP window</li>
+      <li>See that the capture stream ends, resulting in a black video</li>
+    </ol>
+  </div>
+  <p id="error"></p>
+  <div id="video-container">
+    <video width=300 height=300></video>
+  </div>
+  <input type="button" id="open-capture" value="Capture Screen"></input>
+  <input type="button" id="toggle-pip" value="Toggle Pip"></input>
+</body>
+<script>
+const video = document.querySelector('video');
+const videoContainer = document.querySelector('#video-container');
+const errorDisplay = document.querySelector('#error');
+const openCaptureButton = document.querySelector('#open-capture');
+const togglePipButton = document.querySelector('#toggle-pip');
+let pipWindow = null;
+
+async function enterPip() {
+  if (pipWindow != null) {
+    return;
+  }
+  pipWindow = await documentPictureInPicture.requestWindow({width: 400, height: 400});
+  pipWindow.document.body.append(video);
+
+  const openerCaptureButton = pipWindow.document.createElement('input');
+  openerCaptureButton.type = 'button';
+  openerCaptureButton.value = 'Capture Screen From Opener';
+  openerCaptureButton.addEventListener('click', async () => {
+    video.srcObject = await navigator.mediaDevices.getDisplayMedia();
+    video.muted = true;
+    video.play();
+  });
+  pipWindow.document.body.append(openerCaptureButton);
+
+  const pipCaptureButton = pipWindow.document.createElement('input');
+  pipCaptureButton.type = 'button';
+  pipCaptureButton.value = 'Capture Screen From PiP';
+  pipCaptureButton.addEventListener('click', async () => {
+    video.srcObject = await pipWindow.navigator.mediaDevices.getDisplayMedia();
+    video.muted = true;
+    video.play();
+  });
+  pipWindow.document.body.append(pipCaptureButton);
+
+  pipWindow.addEventListener('pagehide', _ => {
+    videoContainer.append(video);
+    pipWindow = null;
+  });
+}
+
+openCaptureButton.addEventListener("click", async () => {
+  try {
+    video.srcObject = await navigator.mediaDevices.getDisplayMedia();
+    video.muted = true;
+    video.play();
+  } catch (error) {
+    errorDisplay.innerText = error;
+    console.log(error);
+  }
+});
+
+togglePipButton.addEventListener("click", async () => {
+  if (pipWindow == null) {
+    enterPip();
+    return;
+  }
+  pipWindow.close();
+});
+
+</script>

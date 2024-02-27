@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>User gesture propagation demo</title>
+<style>
+#toggle-pip {
+  display: block;
+}
+</style>
+</head>
+<body>
+  <input type="button" id="open-on-opener-from-opener" value="window.open from opener context"></input>
+  <input type="button" id="open-on-pip-from-opener" value="pipWindow.open from opener context" disabled></input>
+  <input type="button" id="open-on-opener-from-pip" value="window.open from pip context" disabled></input>
+  <input type="button" id="open-on-pip-from-pip" value="pipWindow.open from pip context" disabled></input>
+  <input type="button" id="toggle-pip" value="Toggle Pip"></input>
+</body>
+<script>
+const openOnOpenerFromOpenerButton = document.querySelector('#open-on-opener-from-opener');
+const openOnPipFromOpenerButton = document.querySelector('#open-on-pip-from-opener');
+const openOnOpenerFromPipButton = document.querySelector('#open-on-opener-from-pip');
+const openOnPipFromPipButton = document.querySelector('#open-on-pip-from-pip');
+const togglePipButton = document.querySelector('#toggle-pip');
+let pipWindow = null;
+
+async function enterPip() {
+  pipWindow = await documentPictureInPicture.requestWindow({width: 400, height: 400});
+
+  const pipOpenOnOpenerFromOpenerButton = pipWindow.document.createElement('input');
+  pipOpenOnOpenerFromOpenerButton.type = 'button';
+  pipOpenOnOpenerFromOpenerButton.value = 'opener.open from opener context';
+  pipOpenOnOpenerFromOpenerButton.addEventListener('click', () => {
+    console.log('opener.open from opener');
+    window.open('https://example.com', '_blank');
+  });
+  pipWindow.document.body.append(pipOpenOnOpenerFromOpenerButton);
+
+  const pipOpenOnPipFromOpenerButton = pipWindow.document.createElement('input');
+  pipOpenOnPipFromOpenerButton.type = 'button';
+  pipOpenOnPipFromOpenerButton.value = 'window.open from opener context';
+  pipOpenOnPipFromOpenerButton.addEventListener('click', () => {
+    console.log('pipWindow.open from opener');
+    pipWindow.open('https://example.com', '_blank');
+  });
+  pipWindow.document.body.append(pipOpenOnPipFromOpenerButton);
+
+  const pipScript = pipWindow.document.createElement('script');
+  pipScript.src = 'user-gesture-pip-script.js';
+  pipWindow.document.body.append(pipScript);
+}
+
+openOnOpenerFromOpenerButton.addEventListener('click', () => {
+  console.log('window.open from opener');
+  window.open('https://example.com', '_blank');
+});
+
+openOnPipFromOpenerButton.addEventListener('click', () => {
+  console.log('pipWindow.open from opener');
+  pipWindow.open('https://example.com', '_blank');
+});
+
+togglePipButton.addEventListener("click", async () => {
+  if (pipWindow == null) {
+    enterPip();
+    openOnPipFromOpenerButton.removeAttribute('disabled');
+    openOnOpenerFromPipButton.removeAttribute('disabled');
+    openOnPipFromPipButton.removeAttribute('disabled');
+    return;
+  }
+  pipWindow.close();
+});
+
+</script>

@@ -20,6 +20,7 @@ async function enterPip() {
     return;
   }
   pipWindow = await documentPictureInPicture.requestWindow({width: 400, height: 400, allowReturnToTab: false});
+  pipWindow.document.body.innerText = 'This picture-in-picture window should not display a back-to-tab button';
 }
 
 togglePipButton.addEventListener("click", async () => {

@@ -16,6 +16,7 @@ openOnOpenerFromPipButton.addEventListener('click', () => {
   opener.open('https://example.com', '_blank');
 });
 document.body.append(openOnOpenerFromPipButton);
+document.body.append(document.createElement('br'));
 
 const openOnPipFromPipButton = document.createElement('input');
 openOnPipFromPipButton.type = 'button';
@@ -25,3 +26,8 @@ openOnPipFromPipButton.addEventListener('click', () => {
   window.open('https://example.com', '_blank');
 });
 document.body.append(openOnPipFromPipButton);
+document.body.append(document.createElement('br'));
+
+const pDescription = document.createElement('p');
+pDescription.innerText = 'A green background means that transient user activation is active.';
+document.body.append(pDescription);

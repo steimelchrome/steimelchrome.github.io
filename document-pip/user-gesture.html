@@ -9,11 +9,12 @@
 </style>
 </head>
 <body>
-  <input type="button" id="open-on-opener-from-opener" value="window.open from opener context"></input>
-  <input type="button" id="open-on-pip-from-opener" value="pipWindow.open from opener context" disabled></input>
-  <input type="button" id="open-on-opener-from-pip" value="window.open from pip context" disabled></input>
-  <input type="button" id="open-on-pip-from-pip" value="pipWindow.open from pip context" disabled></input>
-  <input type="button" id="toggle-pip" value="Toggle Pip"></input>
+  <input type="button" id="open-on-opener-from-opener" value="window.open from opener context"></input><br />
+  <input type="button" id="open-on-pip-from-opener" value="pipWindow.open from opener context" disabled></input><br />
+  <input type="button" id="open-on-opener-from-pip" value="window.open from pip context" disabled></input><br />
+  <input type="button" id="open-on-pip-from-pip" value="pipWindow.open from pip context" disabled></input><br />
+  <input type="button" id="toggle-pip" value="Toggle Pip"></input><br />
+  <p>A green background means that transient user activation is active.</p>
 </body>
 <script>
 const openOnOpenerFromOpenerButton = document.querySelector('#open-on-opener-from-opener');
@@ -34,6 +35,7 @@ async function enterPip() {
     window.open('https://example.com', '_blank');
   });
   pipWindow.document.body.append(pipOpenOnOpenerFromOpenerButton);
+  pipWindow.document.body.append(pipWindow.document.createElement('br'));
 
   const pipOpenOnPipFromOpenerButton = pipWindow.document.createElement('input');
   pipOpenOnPipFromOpenerButton.type = 'button';
@@ -43,10 +45,13 @@ async function enterPip() {
     pipWindow.open('https://example.com', '_blank');
   });
   pipWindow.document.body.append(pipOpenOnPipFromOpenerButton);
+  pipWindow.document.body.append(pipWindow.document.createElement('br'));
 
   const pipScript = pipWindow.document.createElement('script');
   pipScript.src = 'user-gesture-pip-script.js';
   pipWindow.document.body.append(pipScript);
+
+  pipWindow.setInterval(setBackgroundByActivation.bind(null, pipWindow), 10);
 }
 
 openOnOpenerFromOpenerButton.addEventListener('click', () => {
@@ -69,5 +74,14 @@ togglePipButton.addEventListener("click", async () => {
   }
   pipWindow.close();
 });
+
+function setBackgroundByActivation(win) {
+  if (win.navigator.userActivation.isActive) {
+    win.document.body.style.background = 'green';
+  } else {
+    win.document.body.style.background = '';
+  }
+}
+window.setInterval(setBackgroundByActivation.bind(null, window), 10);
 
 </script>

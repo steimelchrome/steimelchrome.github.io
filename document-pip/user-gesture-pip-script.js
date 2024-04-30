@@ -31,3 +31,11 @@ document.body.append(document.createElement('br'));
 const pDescription = document.createElement('p');
 pDescription.innerText = 'A green background means that transient user activation is active.';
 document.body.append(pDescription);
+
+const soIframe = document.createElement('iframe');
+soIframe.src = 'user-activation-iframe.html';
+document.body.append(soIframe);
+
+const xoIframe = document.createElement('iframe');
+xoIframe.src = 'https://steimel.github.io/blue-on-activation.html';
+document.body.append(xoIframe);

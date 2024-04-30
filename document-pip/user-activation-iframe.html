@@ -1,0 +1,20 @@
+<head>
+<style>
+body {
+  background: white;
+}
+
+body.active {
+  background: red;
+}
+</style>
+</head>
+<body>
+  <p>This is a same-origin iframe. A red background means that transient user activation is active.</p>
+<script>
+function setBackgroundByActivation() {
+  document.body.classList.toggle('active', navigator.userActivation.isActive);
+}
+setInterval(setBackgroundByActivation, 10);
+</script>
+</body>

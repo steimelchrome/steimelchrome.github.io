@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>Media Controls Scrubber Zoom bug</title>
+<body>
+  <style>
+  .container {
+    zoom: 1.47656;
+    width: 400px;
+  }
+
+  video {
+    width: 100%;
+  }
+</style>
+
+<div class="container">
+  <video controls>
+    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+  </video>
+</div>
+<a target="_blank" href="https://crbug.com/347990500">Bug</a>
+</body>

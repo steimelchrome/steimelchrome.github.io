@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<head>
+<meta charset="utf-8">
+<title>Document Picture-in-Picture Sample - Click to Resize 2</title>
+<link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
+</head>
+<body class="mdc-typography">
+  <h2 class="mdc-typography--headline3">Click to Resize Document Picture-in-Picture</h2>
+  <button id="btnOpenPip" class="mdc-button mdc-button--raised">
+    <span class="mdc-button__label">Open PiP</span>
+  </button>
+
+  <script>
+const btnOpenPip = document.getElementById('btnOpenPip');
+let pipWindow;
+let currentlySmall = false;
+const smallWidth = 300;
+const smallHeight = 300;
+const largeWidth = 500;
+const largeHeight = 500;
+
+btnOpenPip.addEventListener('click', async _ => {
+  pipWindow = await documentPictureInPicture.requestWindow({ width: smallWidth, height: smallHeight });
+  let pipDocument = pipWindow.document;
+  const toggleButton = pipDocument.createElement('button');
+  toggleButton.textContent = 'Toggle PiP Window Size';
+  toggleButton.addEventListener('click', () => {
+    currentlySmall = !currentlySmall;
+    pipWindow.resizeTo(currentlySmall ? smallWidth : largeWidth,
+                       currentlySmall ? smallHeight : largeHeight);
+  });
+  pipDocument.body.append(toggleButton);
+});
+  </script>
+</body>

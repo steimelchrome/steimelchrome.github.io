@@ -6,16 +6,37 @@
 <script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
 </head>
 <body>
+<div>
   <video id="video" src="https://storage.googleapis.com/media-session/sintel/trailer.mp4" controls width=400></video>
   <button id="btnOpenPip" class="mdc-button mdc-button--raised">
     <span class="mdc-button__label">Open PiP</span>
   </button>
-  <script>
+</div>
+<div>
+Action Log:
+<ul id="ulLog">
+</ul>
+</div>
 const video = document.getElementById('video');
 const btnOpenPip = document.getElementById('btnOpenPip');
+const ulLog = document.getElementById('ulLog');
+
+function addLog(text) {
+  const li = document.createElement('li');
+  li.innerText = text;
+  ulLog.append(li);
+}
 
 btnOpenPip.addEventListener('click', _ => {
   video.requestPictureInPicture();
+});
+
+navigator.mediaSession.setActionHandler('nexttrack', _ => {
+  addLog('Next Track');
+});
+
+navigator.mediaSession.setActionHandler('previoustrack', _ => {
+  addLog('Previous Track');
 });
   </script>
 </body>

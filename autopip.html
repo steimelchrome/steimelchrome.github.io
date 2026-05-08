@@ -25,9 +25,11 @@
   <input type="button" id="open-camera" value="Open Camera"></input>
   <input type="button" id="toggle-pip" value="Toggle Manual Pip"></input>
   <input type="radio" id="use-document" name="pip-type" value="document" checked></input>
-  <label for="use-document">Use Document PiP"</label><br>
+  <label for="use-document">Use Document PiP</label><br>
   <input type="radio" id="use-video" name="pip-type" value="video"></input>
-  <label for="use-Video">Use Video PiP</label><br>
+  <label for="use-video">Use Video PiP</label><br>
+  <input type="checkbox" id="delay-open" name="delay-open"></input>
+  <label for="delay-open">Open pip on a delay</label>
 </body>
 <script>
 const video = document.querySelector('video');
@@ -38,6 +40,15 @@ const togglePipButton = document.querySelector('#toggle-pip');
 let pipWindow = null;
 
 async function enterPip() {
+  const shouldDelay = document.querySelector('input[name="delay-open"]:checked').value;
+  if (shouldDelay) {
+    window.setTimeout(enterPipNow, 1000);
+  } else {
+    enterPipNow();
+  }
+}
+
+async function enterPipNow() {
   const pipType = document.querySelector('input[name="pip-type"]:checked').value;
   if (pipWindow != null) {
     return;

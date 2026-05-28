@@ -40,7 +40,7 @@ const togglePipButton = document.querySelector('#toggle-pip');
 let pipWindow = null;
 
 async function enterPip() {
-  const shouldDelay = document.querySelector('input[name="delay-open"]:checked').value;
+  const shouldDelay = document.querySelector('input[name="delay-open"]').checked;
   if (shouldDelay) {
     window.setTimeout(enterPipNow, 1000);
   } else {

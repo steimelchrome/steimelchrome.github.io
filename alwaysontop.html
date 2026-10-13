@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Always-on-Top Popup Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 640px;
+      margin: 40px auto;
+      padding: 0 20px;
+      line-height: 1.5;
+    }
+    .card {
+      border: 1px solid #dadce0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .field {
+      margin-bottom: 12px;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      font-family: monospace;
+      font-size: 14px;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 10px 18px;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-right: 8px;
+    }
+    button:hover {
+      background-color: #1557b0;
+    }
+    button.secondary {
+      background-color: #f1f3f4;
+      color: #202124;
+      border: 1px solid #dadce0;
+    }
+    button.secondary:hover {
+      background-color: #e8eaed;
+    }
+    .status-row {
+      margin-top: 12px;
+      font-size: 14px;
+    }
+    code {
+      background: #f1f3f4;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    #log {
+      font-family: monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 4px;
+      border: 1px solid #e8eaed;
+      min-height: 40px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Always-on-Top Popup Test</h1>
+
+  <div class="card">
+    <div class="field">
+      <label for="url-input">URL</label>
+      <input id="url-input" type="text" value="https://example.com">
+    </div>
+    <div class="field">
+      <label for="features-input">Window Features</label>
+      <input id="features-input" type="text" value="width=350,height=300,left=1300,top=500,alwaysOnTop">
+    </div>
+
+    <div>
+      <button id="open-btn" type="button">
+        Request Permission (if needed) &amp; Open Popup
+      </button>
+      <button id="request-perm-btn" class="secondary" type="button">
+        Request Permission Only
+      </button>
+    </div>
+
+    <div class="status-row">
+      Window-Management Permission: <code id="perm-status">checking...</code>
+    </div>
+  </div>
+
+  <div class="card">
+    <label for="log">Log</label>
+    <div id="log">Ready.</div>
+  </div>
+
+  <script>
+    const urlInput = document.getElementById('url-input');
+    const featuresInput = document.getElementById('features-input');
+    const openBtn = document.getElementById('open-btn');
+    const requestPermBtn = document.getElementById('request-perm-btn');
+    const permStatusEl = document.getElementById('perm-status');
+    const logEl = document.getElementById('log');
+
+    let currentPermissionState = 'unknown';
+
+    function log(message) {
+      const timestamp = new Date().toLocaleTimeString();
+      logEl.textContent = `[${timestamp}] ${message}\n` + logEl.textContent;
+    }
+
+    async function initPermissionStatus() {
+      if (!navigator.permissions || !navigator.permissions.query) {
+        permStatusEl.textContent = 'Permissions API unavailable';
+        return;
+      }
+      try {
+        const status = await navigator.permissions.query({ name: 'window-management' });
+        currentPermissionState = status.state;
+        permStatusEl.textContent = status.state;
+        status.addEventListener('change', () => {
+          currentPermissionState = status.state;
+          permStatusEl.textContent = status.state;
+          log(`Permission state changed to: ${status.state}`);
+        });
+      } catch (err) {
+        permStatusEl.textContent = 'error';
+        log(`Failed to query window-management permission: ${err.message}`);
+      }
+    }
+
+    async function ensurePermission() {
+      if (currentPermissionState === 'granted') {
+        return true;
+      }
+      if (!('getScreenDetails' in window)) {
+        log('window.getScreenDetails() is not available (requires a secure context such as https://, http://localhost, or file://).');
+        return false;
+      }
+      try {
+        log('Requesting window-management permission via getScreenDetails()...');
+        await window.getScreenDetails();
+        return true;
+      } catch (err) {
+        log(`Permission request failed or was denied: ${err.message}`);
+        return false;
+      }
+    }
+
+    openBtn.addEventListener('click', async () => {
+      // If permission is not already known to be granted, request it first.
+      // Accepting the window-management prompt refreshes transient user
+      // activation on the frame, allowing window.open() to succeed afterwards.
+      if (currentPermissionState !== 'granted') {
+        await ensurePermission();
+      }
+
+      const url = urlInput.value;
+      const features = featuresInput.value;
+      log(`Calling window.open('${url}', '_blank', '${features}')`);
+      const popup = window.open(url, '_blank', features);
+      if (!popup) {
+        log('window.open() returned null (popup may have been blocked).');
+      } else {
+        log('Popup opened successfully.');
+      }
+    });
+
+    requestPermBtn.addEventListener('click', async () => {
+      await ensurePermission();
+    });
+
+    initPermissionStatus();
+  </script>
+</body>
+</html>
+

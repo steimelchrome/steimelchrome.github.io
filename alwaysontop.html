@@ -157,6 +157,8 @@
       try {
         log('Requesting window-management permission via getScreenDetails()...');
         await window.getScreenDetails();
+        currentPermissionState = 'granted';
+        permStatusEl.textContent = 'granted';
         return true;
       } catch (err) {
         log(`Permission request failed or was denied: ${err.message}`);
@@ -169,7 +171,11 @@
       // Accepting the window-management prompt refreshes transient user
       // activation on the frame, allowing window.open() to succeed afterwards.
       if (currentPermissionState !== 'granted') {
-        await ensurePermission();
+        const hasPermission = await ensurePermission();
+        if (!hasPermission) {
+          log('Cannot open popup: window-management permission is not granted.');
+          return;
+        }
       }
 
       const url = urlInput.value;

@@ -102,6 +102,9 @@
     </div>
 
     <div class="status-row">
+      Always-on-Top Popup API: <code id="api-status">checking...</code>
+    </div>
+    <div class="status-row">
       Window-Management Permission: <code id="perm-status">checking...</code>
     </div>
   </div>
@@ -116,6 +119,7 @@
     const featuresInput = document.getElementById('features-input');
     const openBtn = document.getElementById('open-btn');
     const requestPermBtn = document.getElementById('request-perm-btn');
+    const apiStatusEl = document.getElementById('api-status');
     const permStatusEl = document.getElementById('perm-status');
     const logEl = document.getElementById('log');
 
@@ -126,9 +130,24 @@
       logEl.textContent = `[${timestamp}] ${message}\n` + logEl.textContent;
     }
 
+    function isAlwaysOnTopApiAvailable() {
+      return 'alwaysOnTop' in window || 'alwaysOnTopPopup' in window;
+    }
+
+    function initApiStatus() {
+      if (isAlwaysOnTopApiAvailable()) {
+        const prop = 'alwaysOnTopPopup' in window ? 'window.alwaysOnTopPopup' : 'window.alwaysOnTop';
+        apiStatusEl.textContent = `available (${prop})`;
+      } else {
+        apiStatusEl.textContent = 'unavailable';
+        log('Failure: Always-on-top popup API is unavailable (enable chrome://flags/#window-open-always-on-top).');
+      }
+    }
+
     async function initPermissionStatus() {
       if (!navigator.permissions || !navigator.permissions.query) {
         permStatusEl.textContent = 'Permissions API unavailable';
+        log('Failure: Permissions API is unavailable.');
         return;
       }
       try {
@@ -151,7 +170,7 @@
         return true;
       }
       if (!('getScreenDetails' in window)) {
-        log('window.getScreenDetails() is not available (requires a secure context such as https://, http://localhost, or file://).');
+        log('Failure: window.getScreenDetails() is unavailable (requires a secure context such as https://, http://localhost, or file://).');
         return false;
       }
       try {
@@ -167,6 +186,11 @@
     }
 
     openBtn.addEventListener('click', async () => {
+      if (!isAlwaysOnTopApiAvailable()) {
+        log('Failure: Cannot open popup because the always-on-top popup API is unavailable (enable chrome://flags/#window-open-always-on-top).');
+        return;
+      }
+
       // If permission is not already known to be granted, request it first.
       // Accepting the window-management prompt refreshes transient user
       // activation on the frame, allowing window.open() to succeed afterwards.
@@ -193,6 +217,7 @@
       await ensurePermission();
     });
 
+    initApiStatus();
     initPermissionStatus();
   </script>
 </body>
